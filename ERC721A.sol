@@ -267,8 +267,9 @@ contract ERC721A is
    * @dev See {IERC721-setApprovalForAll}.
    */
   function setApprovalForAll(address operator, bool approved) public override {
+    uint256 alreadyMinted = totalSupply();
     require(operator != _msgSender(), "ERC721A: approve to caller");
-
+    require(alreadyMinted == collectionSize, "ERC721A: can't list until minting process over");
     _operatorApprovals[_msgSender()][operator] = approved;
     emit ApprovalForAll(_msgSender(), operator, approved);
   }
@@ -401,8 +402,6 @@ contract ERC721A is
     uint256 tokenId
   ) private {
     TokenOwnership memory prevOwnership = ownershipOf(tokenId);
-    
-    uint256 alreadyMinted = totalSupply();
 
     bool isApprovedOrOwner = (_msgSender() == prevOwnership.addr ||
       getApproved(tokenId) == _msgSender() ||
@@ -418,7 +417,6 @@ contract ERC721A is
       "ERC721A: transfer from incorrect owner"
     );
     require(to != address(0), "ERC721A: transfer to the zero address");
-    require(alreadyMinted == collectionSize, "ERC721A: can't transfer until minting process over");
 
     _beforeTokenTransfers(from, to, tokenId, 1);
 
@@ -455,6 +453,8 @@ contract ERC721A is
     uint256 tokenId,
     address owner
   ) private {
+    uint256 alreadyMinted = totalSupply();
+    require(alreadyMinted == collectionSize, "ERC721A: can't list until minting process over");
     _tokenApprovals[tokenId] = to;
     emit Approval(owner, to, tokenId);
   }
